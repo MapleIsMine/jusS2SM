@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:c="http://www.springframework.org/schema/c"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:jee="http://www.springframework.org/schema/jee"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+         http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd
+         http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd">
+
+
+		<!-- 联接jms服务器 -->
+		<bean id="targetConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+			<property name="brokerURL" value="tcp://localhost:61616"></property>
+		</bean>
+		
+		<!-- 配置 activemq的联接池  对联接进行池化操作-->
+		<bean id="pooledConnectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory" >
+			<property name="connectionFactory" ref="targetConnectionFactory" />
+			<property name="maxConnections" value="100" />
+			<property name="maximumActive" value="50" />
+ 		</bean>
+ 		
+ 		<!-- 配置spring的联接工厂，将 pooledConnectionFactory注入，   这个联接工厂将缓存session, 生产者，消费者-->
+ 		<bean id="cachingConnectionFactory" class="org.springframework.jms.connection.CachingConnectionFactory">
+ 			<constructor-arg ref="pooledConnectionFactory"></constructor-arg>
+ 		</bean>
+ 		
+ 		<!-- 创建spring提供的帮助类  jmsTemplate -->
+ 		<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate" >
+ 			<constructor-arg ref="cachingConnectionFactory"></constructor-arg>
+ 		</bean>
+ 	
+ 		<!-- 配置发送消息存的队列 -->
+		<bean id="sendDestination" class="org.apache.activemq.command.ActiveMQQueue">
+			<constructor-arg value="sendDestinationQueue" />
+		</bean>
+		
+		<!-- 配置响应消息存的队列 -->
+		<bean id="replyDestination" class="org.apache.activemq.command.ActiveMQQueue">
+			<constructor-arg value="replyDestinationQueue" />
+		</bean>
+		
+		
+		<!-- 配置监听消费者回送信息的监听器 -->
+		<bean id="replyMessageListener" class="com.yc.jms.listener.ReplyMessageListener">
+		</bean>
+		
+		<!-- 配置这个监听器运行的容器 -->
+		<bean id="defaultMessageListenerContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+			<property name="connectionFactory" ref="cachingConnectionFactory" />
+			<property name="destination" ref="replyDestination" />
+			<property name="messageListener" ref="replyMessageListener"></property>
+		</bean>
+	
+	
+	
+
+</beans>

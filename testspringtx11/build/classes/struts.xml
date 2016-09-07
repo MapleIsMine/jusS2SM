@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+	<!-- 关闭动态方法调用     actionid!方法名.action -->
+	<constant name="struts.enable.DynamicMethodInvocation" value="false" />
+	<!-- 启用开发模式 -->
+	<constant name="struts.devMode" value="true" />
+	<!-- action的创建由spring来完成,而不由struts完成. -->
+	<constant name="struts.objectFactory" value="spring" />
+
+	
+	
+
+
+</struts>

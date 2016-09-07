@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+         http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+	<!-- 启用注解解析器 -->
+	<context:annotation-config />
+	<!-- 因为采用了混合解析方式( 有一部分配置在xml中,有一部分在java类中，所以要让spring的注解解析器去扫描包 -->
+	<context:component-scan base-package="com.yc" />
+	<!-- 启用aspectj的注解方式的代理 -->
+	<aop:aspectj-autoproxy />
+
+	<!-- 一定要加，因为这样才可以激活事务注解. <tx:annotation-driven transaction-manager="txManager" 
+		/> -->
+
+	<!-- 读取jdbc的配置文件 <context:property-placeholder location="jdbc.properties" 
+		/> -->
+
+	<!-- -->
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations" value="classpath:jdbc.properties" />
+	</bean>
+
+
+	<!-- 配置一个数据源 : 如何通过spring来产生一个数据源(版本一中是mybatis产生的) <bean id="dataSource" 
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource"> <property 
+		name="driverClassName" value="${driverName}" /> <property name="url" value="${url}" 
+		/> <property name="username" value="${username}" /> <property name="password" 
+		value="${pwd}" /> </bean> -->
+
+	<!-- -->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+		destroy-method="close">
+		<property name="driverClass" value="${driverName}" />
+		<property name="jdbcUrl" value="${url}" />
+		<property name="user" value="${username}" />
+		<property name="password" value="${pwd}" />
+	</bean>
+
+	<!-- 以上的dataSource 也可以配置成从 jndi中取.. -->
+
+	<!-- 有了上面的dataSource后，项目的dao层可以使用多种框架: mybatis, jdbc, hibernate, jpa ... -->
+
+
+	<!-- 我们选用的是 dao层的 mybatis框架, 但spring没有提供mybatis的整合的功能， 但mybatis自己开发了一个插件, 
+		mybatis-spring.xxx.jar -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<!-- 在这个 sqlSessionFactory中，主要要完成读取 mybatis的配置文件的工作 -->
+		<!-- 数据源 -->
+		<property name="dataSource" ref="dataSource" />
+		<!-- 配置 configLocation :mybatis的配置文件路径 , 空上sqlSessionFactory会完成读取 这个配置文件 -->
+		<property name="configLocation" value="classpath:mybatis-config.xml" />
+
+		<!-- 如果不读取 mybatis-config.xml文件，那 typealiases, mapper的配置都要单独配 <property 
+			name="typeAliasesPackage" value="com/yc/bean" /> <property name="mapperLocations" 
+			value="classpath:com/yc/dao/*.xml" /> -->
+	</bean>
+
+	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+		<!-- 采用构造器来完成 sqlSessionFactory对象的注入 -->
+		<constructor-arg index="0" ref="sqlSessionFactory" />
+	</bean>
+
+
+	<!-- 配置事务管理器 , mybatis与jdbc的dao层都使用jdbc事务管理器，其它的框架则使用不同的. -->
+	<bean id="txManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<!-- 事务配置 -->
+	<!-- 事务的增强 -->
+	<tx:advice id="txAdvice" transaction-manager="txManager">
+		<!-- 事务的属性 -->
+		<tx:attributes>
+			<!-- 所有的查询方法都配置成 只读事务，传播行为 supports:有事务，则在事务中运行，没有事务，则无事务运行 -->
+			<tx:method name="find*" read-only="true" propagation="SUPPORTS" />
+			<tx:method name="get*" read-only="true" propagation="SUPPORTS" />
+			<tx:method name="retrieve*" read-only="true" propagation="SUPPORTS" />
+			<tx:method name="select*" read-only="true" propagation="SUPPORTS" />
+			<tx:method name="set*" read-only="true" propagation="SUPPORTS" />
+			<!-- 其它的方法则mo认事务: required -->
+			<tx:method name="*" />
+		</tx:attributes>
+	</tx:advice>
+	<!-- 利用spring的aop机制，将上面配置的事务切到 业务层的类中. -->
+	<aop:config>                              <!-- execution:执行后的方法里 * 任意返回类型包括void , impl.*.* 表示impl包下所有的类的所有的方法 (..)表示不管有没有参数 -->
+		<aop:pointcut id="abc" expression="execution(* com.yc.biz.impl.*.*(..))" />
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="abc" />
+	</aop:config>
+
+
+
+
+
+	<!-- 邮件发送部份 -->
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="host" value="smtp.163.com" />
+		<property name="username" value="zhangyingchengqi" />
+		<property name="password" value="zycqzrx800625" />
+		<property name="javaMailProperties">
+			<props>
+				<prop key="mail.smtp.auth">true</prop>
+			</props>
+		</property>
+	</bean>
+
+	<!-- 模板引擎 -->
+	<bean id="velocityEngine"
+		class="org.springframework.ui.velocity.VelocityEngineFactoryBean">
+		<property name="velocityProperties">
+			<value>
+				resource.loader=class
+				class.resource.loader.class=org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader
+			</value>
+		</property>
+	</bean>
+
+
+
+
+
+
+
+	
+	
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</beans>

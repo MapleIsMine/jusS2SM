@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+         http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+	<!-- 启用注解解析器 -->
+	<context:annotation-config />
+	<!-- 因为采用了混合解析方式( 有一部分配置在xml中,有一部分在java类中，所以要让spring的注解解析器去扫描包 -->
+	<context:component-scan base-package="com.yc.jms5" />
+	<!-- 启用aspectj的注解方式的代理 -->
+	<aop:aspectj-autoproxy />
+
+
+	<!-- 创建一个真正的基于 jsm提供者的联接工厂 -->
+	<bean id="targetConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+		<property name="brokerURL" value="tcp://localhost:61616" />
+	</bean>
+
+	<!-- ActiveMQ联接池的方案 -->
+	<bean id="pooledConnectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory">
+		<property name="connectionFactory" ref="targetConnectionFactory" />
+		<property name="maxConnections" value="100" />
+	</bean>
+
+	<!-- 创建spring联接工厂 -->
+	<bean id="singleConnectionFactory"
+		class="org.springframework.jms.connection.SingleConnectionFactory">
+		<property name="targetConnectionFactory" ref="pooledConnectionFactory" />
+	</bean>
+
+	<!-- <bean id="cachingConnectionFactory" class="org.springframework.jms.connection.CachingConnectionFactory" 
+		<property name="targetConnectionFactory" ref="pooledConnectionFactory" /> 
+		</bean> -->
+
+	<!-- 配置jmsTemplate -->
+	<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+		<property name="connectionFactory" ref="singleConnectionFactory" />
+	</bean>
+
+	<!-- 配置目的地: 这有两种：一种是 Queue对应是 P2P模式,另一种是 Topic 对应的是 发布/订阅模式, -->
+	<bean id="queueDestination" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg>
+			<value>myqueue</value>
+		</constructor-arg>
+	</bean>
+
+	<!-- <bean id="topicDestination" class="org.apache.activemq.command.ActiveMQTopic"> 
+		<constructor-arg> <value>mytopic</value> </constructor-arg> </bean> -->
+
+
+	<!-- 配置临听器 -->
+	<bean id="consumerMessageListener1" class="com.yc.jms5.ConsumerMessageListener1">
+	</bean>
+
+	<!-- 配置临听器运行时所在的容器 -->
+	<bean id="jmsContainer"
+		class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+		<property name="connectionFactory" ref="singleConnectionFactory" />
+		<property name="destination" ref="queueDestination" />
+		<property name="messageListener" ref="consumerMessageListener1" />
+	</bean>
+
+
+
+	<!-- 以下用于存放生产者发送的信息 -->
+	<bean id="sendQueueDestination" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg>
+			<value>sendQueue</value>
+		</constructor-arg>
+	</bean>
+	<!--  以下用于存放消费者回复的信息  -->
+	<bean id="replyQueueDestination" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg>
+			<value>replyQueue</value>
+		</constructor-arg>
+	</bean>
+	<!-- 配置   sessionAware的临听器
+	<bean id="consumerMessageListener2" class="com.yc.jms5.ConsumerMessageListener2" >
+		<property name="destination" ref="sendQueueDestination" />
+		<property name="replyDestination" ref="replyQueueDestination" />
+	</bean>	
+	 -->
+	<!-- 配置  consumerMessageListener2的容器 -->
+	<bean id="sessionAwareListenerContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer" >
+			<property name="connectionFactory" ref="singleConnectionFactory" />
+			<property name="destination" ref="sendQueueDestination" />
+			<property name="messageListener" ref="consumerMessageListener2" />
+	</bean>
+
+
+
+
+
+
+
+
+
+
+</beans>

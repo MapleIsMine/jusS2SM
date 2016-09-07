@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yc.dao.opRecordMapper">
+	<cache
+        eviction="FIFO"
+        flushInterval="60000"
+        size="512"
+        readOnly="true" />
+        
+        
+	<insert id="insertOpRecord" parameterType="OpRecord" >
+	 	insert into oprecord(id, accountid, opmoney,optime) values(seq_oprecord.nextval,#{accountid},#{opmoney},sysdate)
+	 </insert>
+	 
+	 
+	 <select id="findCurrentDayRecord" parameterType="OpRecord" resultType="OpRecord">
+	 	select * from oprecord
+   			where optime between to_date(#{toDayStart},'yyyy-mm-dd hh24:mi:ss')  
+        		and to_date(#{toDayEnd},'yyyy-mm-dd hh24:mi:ss')
+	 </select>
+</mapper>

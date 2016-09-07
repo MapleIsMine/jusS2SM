@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>银行业务</title>
+
+<script type="text/javascript" src="js/jquery-1.7.2.min.js" ></script>
+
+<script type="text/javascript">
+$(function() {
+	$("#login").bind("click", function() {
+		$.ajax({
+			type : "post",
+			url : "loginUser_login",
+			data : $("#myform").serialize(),
+			dataType : "json",
+			success : function(data) {
+				//alert(  data.code );
+				
+				document.getElementById("div1").innerHTML="<p>"+data.code+"</p>";
+			}
+		});
+	});
+
+})();
+</script>
+
+</head>
+<body>
+
+ 
+   <form action="" id="myform" name="myform" method="post">
+   	<p>用户名:<input type="text" name="uname" value="a" /></p>
+   	<p>密码:<input type="password" name="pwd" value="a" /></p>
+   
+   	
+   	
+   	<input type="button" id="login" value="登录" />
+   </form>
+<div id="div1"></div>
+</body>
+</html>

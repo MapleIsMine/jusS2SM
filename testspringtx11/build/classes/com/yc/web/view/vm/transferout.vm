@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>友情提示-源辰中央银行</title>
+</head>
+<body>
+	<h1>账户操作提示信息</h1>
+	<hr />
+	${accountOperation.accountid}:<br />
+	您好!<br /> 
+	您账户 的 储蓄卡 于${accountOperation.time}向${accountOperation.inaccountid}转出了  人民币${accountOperation.opmoney}元, 目前余额${accountOperation.balance} 元. <br />
+	如有问题，请电:800-000-9876<br />
+	               
+</body>
+</html>

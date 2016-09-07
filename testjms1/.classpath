@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry kind="lib" path="activemq-all-5.13.0.jar" sourcepath="F:/课件/J2EE企业级开发/7.x/7.1方案/三期/18_spring/1_课件/备课资料/spring各版本/spring-framework-4.1.4.RELEASE-dist/spring-framework-4.1.4.RELEASE/libs/spring-jms-4.1.4.RELEASE-sources.jar"/>
+	<classpathentry kind="lib" path="spring-beans-4.1.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="spring-context-4.1.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="spring-context-support-4.1.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="spring-core-4.1.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="spring-expression-4.1.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="spring-jms-4.1.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="commons-logging.jar"/>
+	<classpathentry kind="lib" path="log4j-1.2.15.jar"/>
+	<classpathentry kind="lib" path="spring-messaging-4.1.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="aopalliance.jar"/>
+	<classpathentry kind="lib" path="aspectjrt.jar"/>
+	<classpathentry kind="lib" path="aspectjweaver.jar"/>
+	<classpathentry kind="lib" path="spring-aop-4.1.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="spring-aspects-4.1.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="commons-collections-3.2.2.jar"/>
+	<classpathentry kind="lib" path="commons-pool2-2.4.2.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

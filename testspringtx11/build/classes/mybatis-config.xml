@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	
+	<properties resource="jdbc.properties"/>
+	
+	<typeAliases>
+		<typeAlias alias="Account" type="com.yc.bean.Account"></typeAlias>
+		<typeAlias alias="OpRecord" type="com.yc.bean.OpRecord"></typeAlias>
+		<typeAlias alias="AccountEmail" type="com.yc.bean.AccountEmail"></typeAlias>
+	</typeAliases>
+	
+	<environments default="development">
+		<environment id="development">
+			<transactionManager type="JDBC" />
+			<dataSource type="POOLED">
+				<property name="driver" value="${driverName}" />
+				<property name="url" value="${url}" />
+				<property name="username" value="${uname}" />
+				<property name="password" value="${pwd}" />
+			</dataSource>
+		</environment>
+	</environments>
+	<mappers>
+		<mapper resource="com/yc/dao/accountMapper.xml" />
+		<mapper resource="com/yc/dao/opRecordMapper.xml" />
+		<mapper resource="com/yc/dao/accountEmailMapper.xml" />
+	</mappers>
+</configuration>
